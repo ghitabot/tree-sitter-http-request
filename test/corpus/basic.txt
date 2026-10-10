@@ -1,0 +1,261 @@
+==================
+basic GET request
+==================
+
+### Get user
+GET https://api.example.com/users/42
+
+---
+
+(document
+  (request
+    (separator
+      name: (separator_text))
+    (request_line
+      method: (method)
+      url: (url))))
+
+==================
+request with headers
+==================
+
+### Named request
+POST https://example.com/
+Content-Type: application/json
+Accept: application/json
+
+---
+
+(document
+  (request
+    (separator
+      name: (separator_text))
+    (request_line
+      method: (method)
+      url: (url))
+    (header
+      name: (header_name)
+      value: (header_value))
+    (header
+      name: (header_name)
+      value: (header_value))))
+
+==================
+request with body
+==================
+
+### Create
+POST https://example.com/users
+Content-Type: application/json
+
+{
+  "name": "Alice"
+}
+
+---
+
+(document
+  (request
+    (separator
+      name: (separator_text))
+    (request_line
+      method: (method)
+      url: (url))
+    (header
+      name: (header_name)
+      value: (header_value))
+    (body
+      (body_line)
+      (body_line)
+      (body_line))))
+
+==================
+interpolation in URL, header, and body
+==================
+
+### Templated
+GET {{baseUrl}}/users/{{id}}
+Authorization: Bearer {{token}}
+
+{
+  "hello": "{{name}}"
+}
+
+---
+
+(document
+  (request
+    (separator
+      name: (separator_text))
+    (request_line
+      method: (method)
+      url: (url
+        (interpolation
+          name: (interpolation_name))
+        (interpolation
+          name: (interpolation_name))))
+    (header
+      name: (header_name)
+      value: (header_value
+        (interpolation
+          name: (interpolation_name))))
+    (body
+      (body_line)
+      (body_line
+        (interpolation
+          name: (interpolation_name)))
+      (body_line))))
+
+==================
+file-level variable declarations
+==================
+
+@baseUrl = https://api.example.com
+@apiKey = abc123
+
+### Use them
+GET {{baseUrl}}/things
+
+---
+
+(document
+  (variable_declaration
+    name: (identifier)
+    value: (variable_value))
+  (variable_declaration
+    name: (identifier)
+    value: (variable_value))
+  (request
+    (separator
+      name: (separator_text))
+    (request_line
+      method: (method)
+      url: (url
+        (interpolation
+          name: (interpolation_name))))))
+
+==================
+line comments
+==================
+
+# hash comment
+// slash comment
+
+### Named
+GET https://example.com/
+
+---
+
+(document
+  (comment_line
+    (comment))
+  (comment_line
+    (comment))
+  (request
+    (separator
+      name: (separator_text))
+    (request_line
+      method: (method)
+      url: (url))))
+
+==================
+HTTP version
+==================
+
+### With version
+GET https://example.com/ HTTP/1.1
+
+### HTTP 2
+POST https://example.com/ HTTP/2
+
+---
+
+(document
+  (request
+    (separator
+      name: (separator_text))
+    (request_line
+      method: (method)
+      url: (url)
+      http_version: (http_version)))
+  (request
+    (separator
+      name: (separator_text))
+    (request_line
+      method: (method)
+      url: (url)
+      http_version: (http_version))))
+
+==================
+empty separator at EOF
+==================
+
+### First
+GET https://example.com/
+
+###
+
+---
+
+(document
+  (request
+    (separator
+      name: (separator_text))
+    (request_line
+      method: (method)
+      url: (url)))
+  (request
+    (separator
+      name: (separator_text))))
+
+==================
+response handler with capture directives
+==================
+
+### Login
+POST https://api/login
+Content-Type: application/json
+
+{"user":"a"}
+
+> {%
+    capture auth_token = $.token
+%}
+
+---
+
+(document
+  (request
+    (separator
+      name: (separator_text))
+    (request_line
+      method: (method)
+      url: (url))
+    (header
+      name: (header_name)
+      value: (header_value))
+    (body
+      (body_line))
+    (response_handler
+      body: (handler_body))))
+
+==================
+response handler inline
+==================
+
+### x
+GET https://a/
+
+> {% capture t = $.token %}
+
+---
+
+(document
+  (request
+    (separator
+      name: (separator_text))
+    (request_line
+      method: (method)
+      url: (url))
+    (response_handler
+      body: (handler_body))))
